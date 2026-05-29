@@ -603,74 +603,49 @@ def compute_summaries(df):
     out["import_partner_rank"] = ip_all.get(latest, {})
 
     #print('df',df)
-    # 5.6 各國出口產業（groupby 去重）
-    d_se = df[
-        (df["年份"]==latest) &
-        #(df["進口國家"]=="W") &
-        #(df["進口國家"]=="W_X") &
-        (df["產業編號"].isin(KEY_PRODUCTS)) &
-        (df["產業編號"]!="_T")
-    ].groupby(["出口國家","產業編號"])["數值"].sum().reset_index()
-    
-    #print('MAIN_COUNTRIES',MAIN_COUNTRIES)
-    #print('d_se',d_se)
-        
-    # 1. 先計算所有在 d_se 中存在的出口國家
-    all_export_countries = set(MAIN_COUNTRIES) | set(d_se["出口國家"].unique())
-    
-    cse = {}
-    for c in all_export_countries:  # 改為遍歷聯集後的國家列表
-        # 2. 篩選資料
-        sub = d_se[d_se["出口國家"] == c].nlargest(10, "數值")[["產業編號", "數值"]].copy()
-        
-        if not sub.empty:
-            sub["產業名稱"] = sub["產業編號"].map(PRODUCT_MAP).fillna(sub["產業編號"])
-            cse[c] = sub.to_dict("records")
-        else:
-            # 選擇性：若您希望空資料不存入，這裡可以略過
-            cse[c] = [] 
-    
-    out["country_sector_export"] = cse
+    # 5.6 各國出口產業（多年度，結構同 ep_all/ip_all）
+    cse_all = {}
+    for y in YEARS:
+        d_se = df[
+            (df["年份"]==y) &
+            #(df["進口國家"]=="W") &
+            #(df["進口國家"]=="W_X") &
+            (df["產業編號"].isin(KEY_PRODUCTS)) &
+            (df["產業編號"]!="_T")
+        ].groupby(["出口國家","產業編號"])["數值"].sum().reset_index()
+        all_export_countries = set(MAIN_COUNTRIES) | set(d_se["出口國家"].unique())
+        cse_y = {}
+        for c in all_export_countries:
+            sub = d_se[d_se["出口國家"] == c].nlargest(10, "數值")[["產業編號", "數值"]].copy()
+            if not sub.empty:
+                sub["產業名稱"] = sub["產業編號"].map(PRODUCT_MAP).fillna(sub["產業編號"])
+                cse_y[c] = sub.to_dict("records")
+            else:
+                cse_y[c] = []
+        cse_all[y] = cse_y
+    out["country_sector_export_by_year"] = cse_all
+    out["country_sector_export"] = cse_all.get(latest, {})  # 向下相容
 
-    
-    # cse = {}
-    # for c in MAIN_COUNTRIES:
-    #     sub = d_se[d_se["出口國家"]==c].nlargest(10,"數值")[["產業編號","數值"]].copy()
-    #     sub["產業名稱"] = sub["產業編號"].map(PRODUCT_MAP).fillna(sub["產業編號"])
-    #     cse[c] = sub.to_dict("records")
-    # print('cse',cse)
-    # out["country_sector_export"] = cse
-
-
-
-
-    
-
-    # 5.7 各國進口產業（groupby 去重，涵蓋所有在資料中出現的進口國）
-    #print('df',df)
-    d_si = df[
-        (df["年份"]==latest) &
-        #(df["出口國家"]=="W") &
-        #(df["出口國家"]=="W_X") &
-        (df["產業編號"].isin(KEY_PRODUCTS)) &
-        (df["產業編號"]!="_T")
-    ].groupby(["進口國家","產業編號"])["數值"].sum().reset_index()
-
-
-    
-    # 涵蓋 MAIN_COUNTRIES + 資料中出現的所有進口國
-    all_import_countries = set(MAIN_COUNTRIES) | set(d_si["進口國家"].unique())
-    
-    #print('all_import_countries',all_import_countries)
-    #print('d_si',d_si)
-    csi = {}
-    for c in all_import_countries:
-        sub = d_si[d_si["進口國家"]==c].nlargest(10,"數值")[["產業編號","數值"]].copy()
-        if not sub.empty:
-            sub["產業名稱"] = sub["產業編號"].map(PRODUCT_MAP).fillna(sub["產業編號"])
-            csi[c] = sub.to_dict("records")
-    #print('csi',csi)
-    out["country_sector_import"] = csi
+    # 5.7 各國進口產業（多年度，結構同 ep_all/ip_all）
+    csi_all = {}
+    for y in YEARS:
+        d_si = df[
+            (df["年份"]==y) &
+            #(df["出口國家"]=="W") &
+            #(df["出口國家"]=="W_X") &
+            (df["產業編號"].isin(KEY_PRODUCTS)) &
+            (df["產業編號"]!="_T")
+        ].groupby(["進口國家","產業編號"])["數值"].sum().reset_index()
+        all_import_countries = set(MAIN_COUNTRIES) | set(d_si["進口國家"].unique())
+        csi_y = {}
+        for c in all_import_countries:
+            sub = d_si[d_si["進口國家"]==c].nlargest(10,"數值")[["產業編號","數值"]].copy()
+            if not sub.empty:
+                sub["產業名稱"] = sub["產業編號"].map(PRODUCT_MAP).fillna(sub["產業編號"])
+                csi_y[c] = sub.to_dict("records")
+        csi_all[y] = csi_y
+    out["country_sector_import_by_year"] = csi_all
+    out["country_sector_import"] = csi_all.get(latest, {})  # 向下相容
 
     # 5.8 產業出口國排名（多年度）
     ser_all = {}
@@ -1264,12 +1239,12 @@ function renderCountry(){{
 
 
   console.log("Country:", country);
-  console.log("SE Raw Data:", D.country_sector_export ? D.country_sector_export[country] : "Key missing");
-  console.log("SI Raw Data:", D.country_sector_import ? D.country_sector_import[country] : "Key missing");
+  console.log("SE Raw Data:", D.country_sector_export_by_year ? (D.country_sector_export_by_year[year]||{{}})[country] : "Key missing");
+  console.log("SI Raw Data:", D.country_sector_import_by_year ? (D.country_sector_import_by_year[year]||{{}})[country] : "Key missing");
 
 
-  const se=((D.country_sector_export||{{}})[country]||[]).slice(0,8);
-  const si=((D.country_sector_import||{{}})[country]||[]).slice(0,6);
+  const se=(((D.country_sector_export_by_year||{{}})[year]||{{}})[country]||[]).slice(0,8);
+  const si=(((D.country_sector_import_by_year||{{}})[year]||{{}})[country]||[]).slice(0,6);
   const mse=se.length?se[0]['數值']:1, msi=si.length?si[0]['數值']:1;
 
   b.innerHTML=`
@@ -1319,7 +1294,7 @@ ${{ip.map((p,i)=>`<div class="bi" onclick="selectCountry('${{p['出口國家']}}
   <div class="bi-tr"><div class="bi-fl fl-imp" style="width:${{Math.round(p['數值']/mip*100)}}%"></div></div>
 </div>`).join('')}}
 </div>
-<div class="st">出口產業結構 <span class="tag">${{LATEST}}</span></div>
+<div class="st">出口產業結構 <span class="tag">${{year}}</span></div>
 <div class="bl">
 ${{se.map((p,i)=>(console.log('即時資料：', i, p),`<div class="bi" onclick="showSP('${{p['產業編號']}}')">
   <span class="bi-rk">${{i+1}}</span>
@@ -1328,7 +1303,7 @@ ${{se.map((p,i)=>(console.log('即時資料：', i, p),`<div class="bi" onclick=
   <div class="bi-tr"><div class="bi-fl fl-sec" style="width:${{Math.round(p['數值']/mse*100)}}%"></div></div>
 </div>`)).join('')}}
 </div>
-<div class="st">進口產業結構 <span class="tag i">${{LATEST}}</span></div>
+<div class="st">進口產業結構 <span class="tag i">${{year}}</span></div>
 <div class="bl">
 ${{si.map((p,i)=>`<div class="bi">
   <span class="bi-rk">${{i+1}}</span>
