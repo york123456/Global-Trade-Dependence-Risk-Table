@@ -552,8 +552,8 @@ def compute_summaries(df):
     # 5.3 全球產業出口排名
     sec = df[
         (df["年份"]==latest) &
-        (df["進口國家"]=="W") &
-        (df["進口國家"]=="W_X") &
+        #(df["進口國家"]=="W") &
+        #(df["進口國家"]=="W_X") &
         (df["產業編號"].isin(KEY_PRODUCTS)) &
         (df["產業編號"]!="_T")
     ].groupby("產業編號")["數值"].sum().reset_index().sort_values("數值",ascending=False).head(20)
@@ -668,8 +668,8 @@ def compute_summaries(df):
     for y in YEARS:
         d_sexp_y = df[
             (df["年份"]==y) &
-            (df["進口國家"]=="W") &
-            (df["進口國家"]=="W_X") &
+            #(df["進口國家"]=="W") &
+            #(df["進口國家"]=="W_X") &
             (df["產業編號"].isin(KEY_PRODUCTS))
         ]
         ser_y = {}
@@ -686,8 +686,8 @@ def compute_summaries(df):
 
     # 5.9 年度變化
     yoy_df = df[
-        (df["進口國家"]=="W") &
-        (df["進口國家"]=="W_X") &
+        #(df["進口國家"]=="W") &
+        #(df["進口國家"]=="W_X") &
         (df["產業編號"]=="_T")
     ].groupby(["出口國家","年份"])["數值"].sum().reset_index()
     yoy = {}
@@ -720,8 +720,8 @@ def compute_summaries(df):
     for y in YEARS:
         gr = df[
             (df["年份"]==y) &
-            (df["進口國家"]=="W") &
-            (df["進口國家"]=="W_X") &
+            #(df["進口國家"]=="W") &
+            #(df["進口國家"]=="W_X") &
             (df["產業編號"]=="_T") &
             (df["出口國家"].isin(MAIN_COUNTRIES))
         ].groupby("出口國家")["數值"].sum().reset_index().sort_values("數值",ascending=False)
