@@ -1238,9 +1238,9 @@ function renderCountry(){{
   const mep=ep.length?ep[0]['數值']:1, mip=ip.length?ip[0]['數值']:1;
 
 
-  console.log("Country:", country);
-  console.log("SE Raw Data:", D.country_sector_export_by_year ? (D.country_sector_export_by_year[year]||{{}})[country] : "Key missing");
-  console.log("SI Raw Data:", D.country_sector_import_by_year ? (D.country_sector_import_by_year[year]||{{}})[country] : "Key missing");
+  //console.log("Country:", country);
+  //console.log("SE Raw Data:", D.country_sector_export_by_year ? (D.country_sector_export_by_year[year]||{{}})[country] : "Key missing");
+  //console.log("SI Raw Data:", D.country_sector_import_by_year ? (D.country_sector_import_by_year[year]||{{}})[country] : "Key missing");
 
 
   const se=(((D.country_sector_export_by_year||{{}})[year]||{{}})[country]||[]).slice(0,8);
@@ -1296,12 +1296,12 @@ ${{ip.map((p,i)=>`<div class="bi" onclick="selectCountry('${{p['出口國家']}}
 </div>
 <div class="st">出口產業結構 <span class="tag">${{year}}</span></div>
 <div class="bl">
-${{se.map((p,i)=>(console.log('即時資料：', i, p),`<div class="bi" onclick="showSP('${{p['產業編號']}}')">
+${{se.map((p,i)=>`<div class="bi" onclick="showSP('${{p['產業編號']}}')">
   <span class="bi-rk">${{i+1}}</span>
   <span class="bi-nm">${{p['產業名稱']||pn(p['產業編號'])}}</span>
   <span class="bi-vl">${{fmt(p['數值'])}}</span>
   <div class="bi-tr"><div class="bi-fl fl-sec" style="width:${{Math.round(p['數值']/mse*100)}}%"></div></div>
-</div>`)).join('')}}
+</div>`).join('')}}
 </div>
 <div class="st">進口產業結構 <span class="tag i">${{year}}</span></div>
 <div class="bl">
