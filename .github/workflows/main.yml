@@ -36,8 +36,8 @@ jobs:
 
     - name: Run Script with Environment Variables
       env:
-        CONFIG: ${{ vars.CONFIG }}
-        TICKERS: ${{ vars.TICKERS }}
+        URL_TICKERS: ${{ vars.URL_TICKERS }}
+        URL_CONFIG: ${{ vars.URL_CONFIG }}
       run: |
         python -u build_trade_dashboard.py --real
 
@@ -47,8 +47,7 @@ jobs:
       env:
         # 使用 GitHub 自動產生的 Token 進行身分驗證，不需額外建立 Secret
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        URL_TICKERS: ${{ vars.URL_TICKERS }}
-        URL_CONFIG: ${{ vars.URL_CONFIG }}
+        
         
       run: |
         # 1. 設定自動提交時的機器人身分
