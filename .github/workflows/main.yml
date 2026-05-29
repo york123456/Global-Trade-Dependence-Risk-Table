@@ -1,0 +1,70 @@
+name: Run Python Script Safely
+
+on:
+  #schedule:
+    # 每天台灣時間早上 9 點執行 (UTC+8 → UTC 1 點)
+  #  - cron: '*/30 * * * *'
+  workflow_dispatch:  # 手動觸發
+
+
+jobs:
+  run-python:
+    runs-on: ubuntu-latest
+
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+        pip install pandas
+        pip install beautifulsoup4
+        pip install lxml
+        pip install ipython
+
+        
+        #pip install yfinance
+
+
+    - name: Run Script with Environment Variables
+      env:
+        CONFIG: ${{ vars.CONFIG }}
+        TICKERS: ${{ vars.TICKERS }}
+      run: |
+        python -u build_trade_dashboard.py --real
+
+
+    # 新增以下步驟：自動將多層子資料夾打包提交
+    - name: Commit and Push Outputs
+      env:
+        # 使用 GitHub 自動產生的 Token 進行身分驗證，不需額外建立 Secret
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        URL_TICKERS: ${{ vars.URL_TICKERS }}
+        URL_CONFIG: ${{ vars.URL_CONFIG }}
+        
+      run: |
+        # 1. 設定自動提交時的機器人身分
+        git config --global user.name "github-actions[bot]"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+        
+
+        if [ -n "$(git status --porcelain)" ]; then
+
+          git add .
+        
+          git commit -m "chore: 系統自動更新資料夾檔案 [skip ci]"
+          git pull --rebase origin main
+          git push origin main
+        else
+          echo "沒有偵測到任何檔案變更，跳過推送。"
+        fi
+        
