@@ -156,6 +156,15 @@ def update_MAIN_COUNTRIES():
     
     #print('MAIN_COUNTRIES',MAIN_COUNTRIES)
 
+    MAIN_COUNTRIES = [
+        "TWN","USA","CHN","JPN","KOR","DEU","GBR","FRA",
+        "CAN","AUS","IND","BRA","MEX","ITA","NLD","ESP",
+        "SGP","HKG","VNM","THA","IDN","MYS","PHL",
+        "RUS","TUR","POL","CHE","SWE","NOR","DNK","FIN",
+        "AUT","BEL","CZE","HUN","PRT","ROU","SVK","SVN",
+        "GRC","ISR","NZL","ZAF","EGY","SAU","ARE","ARG","CHL","COL",
+    ]
+
     return MAIN_COUNTRIES
     
     
