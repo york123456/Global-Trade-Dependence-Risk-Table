@@ -41,7 +41,7 @@ def update_YEARS():
     current_year = datetime.datetime.now().year - 1
 
     # 產生帶有「年」字尾的字串列表
-    year_str_list = [f"{current_year - i}" for i in range(3)]
+    year_str_list = [f"{current_year - i}" for i in range(5)]
 
     YEARS=year_str_list
 
