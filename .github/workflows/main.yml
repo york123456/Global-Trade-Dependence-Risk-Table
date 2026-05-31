@@ -1,9 +1,9 @@
 name: Run Python Script Safely
 
 on:
-  #schedule:
+  schedule:
     # 每天台灣時間早上 9 點執行 (UTC+8 → UTC 1 點)
-  #  - cron: '*/30 * * * *'
+    - cron: '*/30 * * * *'
   workflow_dispatch:  # 手動觸發
 
 
